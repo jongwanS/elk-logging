@@ -35,3 +35,25 @@
     </encoder>
 </appender>
 ````
+````shell
+docker run -d --name elasticsearch -p 9200:9200 -e "discovery.type=single-node" -e "xpack.security.enabled=false" -e "xpack.security.http.ssl.enabled=false" docker.elastic.co/elasticsearch/elasticsearch:8.10.0 --platform linux/amd64
+
+docker run -d --name logstash -p 5044:5044 -p 9600:9600 -v ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf docker.elastic.co/logstash/logstash:8.10.0
+
+docker network create elastic-network
+docker network connect elastic-network elasticsearch
+docker network connect elastic-network logstash
+````
+
+````
+http://localhost:9200/_cat/indices?v
+> 인덱스 확인
+
+샤드 : 데이터를 나눠서 저장
+````
+
+#### 엘라스틱 서치
+- 인덱싱한 로깅 확인
+  - http://localhost:9200/application-logs-2025.04.01/_search
+- 에그리게이션(집계 하여, 에러로그가 일정 수준에 올라가면 알림이가게끔 할 수 있다.)
+  - localhost:9200/application-logs-*/_search
